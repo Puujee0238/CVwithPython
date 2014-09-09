@@ -1,0 +1,5 @@
+# virtualenv
+venv/
+
+# compiled files
+*.py[co]
