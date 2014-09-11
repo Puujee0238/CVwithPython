@@ -1,41 +1,70 @@
 # Chapter 1, Exercise 2
-# Implement unsharp masking to an image (both color and grayscale)
+
+# Implement an unsharp masking operation (http://en.wikipedia.org/wiki/Unsharp_ masking) 
+# by blurring an image and then subtracting the blurred version from the original. 
+# This gives a sharpening effect to the image. Try this on both color and grayscale images.
 
 from PIL import Image
 from pylab import *
 from numpy import *
 from scipy.ndimage import filters
-import imtools
 
 # read image
-im = array(Image.open('data/empire.jpg').convert('L'))
+im_color = array(Image.open('data/prometheus.jpg'))
+im_gray = array(Image.open('data/prometheus.jpg').convert('L'))
 
-# make high-contrast version
-# imhc, cdf = imtools.histeq(im)
+# make unsharp mask by blurring
+# in the color image we need to filter each color channel separately
+# tuple passed to filter gives sigma for x, y, and 'cross-color' filtering
+# the 'cross-color' filtering should be zero to avoid mixing (gaussian filtering) colors
+im_color_blur = filters.gaussian_filter(im_color,[3,3,0])
+im_gray_blur = filters.gaussian_filter(im_gray,3)
 
-# make unsharp mask
-imblur = filters.gaussian_filter(im,0)
-immask = im - imblur
+# apply mask - empirically choose constant
+im_color_sharp = im_color - 0.5*im_color_blur
+im_gray_sharp = im_gray - 0.5*im_gray_blur
 
-# apply mask
-imsharp1 = im + 1.0*immask
-imsharp2 = im + 0.67*immask
-imsharp3 = im + 0.33*immask
+# renormalize result - color
+for jj in range(3):
+	min_orig = float(im_color[:,:,jj].min())
+	max_orig = float(im_color[:,:,jj].max())
+	min_new = float(im_color_sharp[:,:,jj].min())
+	max_new = float(im_color_sharp[:,:,jj].max())
+	scale_factor = (max_orig - min_orig) / (max_new - min_new)
+	im_color_sharp[:,:,jj] = scale_factor * (im_color_sharp[:,:,jj] - min_new) + min_orig
 
-#display original and filter
-figure()
+# renormalize result - grayscale
+min_orig = im_gray.min()
+max_orig = im_gray.max()
+min_new = im_gray_sharp.min()
+max_new = im_gray_sharp.max()
+scale_factor = (max_orig - min_orig) / (max_new - min_new)
+im_gray_sharp = scale_factor * (im_gray_sharp - min_new)
+
+# convert back to 8-bit integers 
+# necessary for color image, redundant but good practice for grayscale
+im_color_sharp = uint8(im_color_sharp)
+im_gray_sharp = uint8(im_gray_sharp)
+
+#display original and sharpened version (color)
+fig1=figure(figsize=(8,8))
+subplot(2,1,1)
+axis('off')
+imshow(im_color)
+subplot(2,1,2)
+axis('off')
+imshow(im_color_sharp)
+subplots_adjust(left=0,right=1,bottom=0,top=1,wspace=0,hspace=0)
+show()
+
+#display original and sharpened version (grayscale)
+fig1=figure(figsize=(8,8))
 gray()
-subplot(2,2,1)
+subplot(2,1,1)
 axis('off')
-imshow(im)
-subplot(2,2,2)
-imshow(imsharp1)
+imshow(im_gray)
+subplot(2,1,2)
 axis('off')
-subplot(2,2,3)
-imshow(imsharp2)
-axis('off')
-subplot(2,2,4)
-imshow(imsharp3)
-axis('off')
+imshow(im_gray_sharp)
 subplots_adjust(left=0,right=1,bottom=0,top=1,wspace=0,hspace=0)
 show()

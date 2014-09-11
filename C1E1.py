@@ -1,6 +1,8 @@
 # Chapter 1, Exercise 1
-# Apply gaussian blur to an image per Fig 1.9; plot contours 
-# for increaseing sigma. What happens and why?
+
+# "1. Take an image and apply Gaussian blur like in Figure 1.9. 
+# Plot the image contours for increasing values of sigma.
+# What happens? Can you explain why?
 
 # Answer: contours get spaced farther apart; detail disappears
 # The blur is erasing sharp edges, making contours less distinct.
@@ -18,7 +20,7 @@ import imtools
 im = array(Image.open('data/empire.jpg').convert('L'))
 
 # apply filter
-im2 = filters.gaussian_filter(im,5)
+im2 = filters.gaussian_filter(im,7)
 
 #display original and filter
 figure()

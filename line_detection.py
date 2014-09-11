@@ -10,11 +10,11 @@ from scipy.ndimage import measurements,morphology
 
 # parameters
 sigma_blur = 3	# scale for initial guassian blur (de-noising)
-sigma_deriv = 3	# scale for gaussian filter for derivative
+sigma_deriv = 2	# scale for gaussian filter for derivative
 max_sup_size = 3	# size for footprint in filter for non-max gradient suppression
 hyst_size = 3	# size for footprint in hystersis filter
-threshold_low = 0.05	# low threshold for hysteresis filter
-threshold_high = 0.15 # high threshold for hysteresis filter
+threshold_low = 0.03	# low threshold for hysteresis filter
+threshold_high = 0.1 # high threshold for hysteresis filter
 
 class edge_filter_class:
 	# To be used with ndimage.generic_filter
@@ -68,7 +68,7 @@ class edge_filter_class:
 			pixels = array([[bfr[3],bfr[6]],[bfr[2],bfr[5]]])
 		
 		weight = ( abs(angle) % (pi/4) ) / (pi/4)
-		weights = array([weight,1-weight])
+		weights = array([1-weight,weight])
 
 		return dot(pixels,weights)
 
@@ -136,7 +136,8 @@ im0[im5bool,:] = array([255,0,0])
 props = dict(boxstyle='round',facecolor='white')
 fig=figure(figsize=(12,8))
 axis('off')
-imshow(im0)
+#imshow(im0)
+contour(im0,origin='image')
 #text = 'Smoothing = %d \nDerivative = %d \nTL = %.2f \nTH = %.2f' % (sigma_blur,sigma_deriv,threshold_low,threshold_high)
 #fig.text(0.05,0.95,text,transform=fig.transAxes,verticalalignment='top',bbox=props)
 subplots_adjust(left=0,bottom=0,right=1,top=1,wspace=0,hspace=0)
